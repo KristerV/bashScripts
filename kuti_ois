@@ -1,0 +1,50 @@
+#!/bin/bash
+# Do Kivy stuff
+
+function start_unoconv {
+    unoconv -lv
+}
+
+# MAIN
+function press_enter {
+    echo ""
+    #echo -n "Press Enter to continue.."
+    #read
+    clear
+}
+
+function connect_live {
+    gnome-terminal --window-with-profile=live -e "ssh krister@ois.ee" &
+}
+
+clear=True
+selection=
+until [ "$selection" = "0" ]; do
+    if [ $clear = True ]; then
+        clear
+    fi
+    echo "      "
+    echo "      "
+    echo "        ÕIS COMMANDS  "
+    echo "      ----------------"
+    echo "      "
+    echo "      1. start local server"
+    echo "      2. start unoconverter"
+    echo "      3. login backup"
+    echo "      "
+    echo "      7. login to Live server"
+    echo "      "
+    echo "      0. exit"
+    echo "      "
+    echo -n "      "
+    read selection
+    echo ""
+    case $selection in
+        1 ) ssh krister@dev.ois.ee -L3306:localhost:3306; exit ;;
+        2 ) start_unoconv ;;
+        3 ) ssh krister@172.16.0.129; exit ;;
+        7 ) clear; connect_live; exit ;;
+        0 ) clear; exit ;;
+        * ) echo "Please enter a number"; press_enter
+    esac
+done

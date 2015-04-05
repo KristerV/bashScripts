@@ -1,0 +1,135 @@
+#!/bin/bash
+
+function redeploy {
+    clear;
+    ssh root@95.85.56.82 "cd /srv/$1/ && git pull && cd /srv/deploy_$1/ && mup deploy";
+    exit ;
+}
+
+function deploy_homefood_live {
+    clear;
+    ssh root@toitla.com "bash -ic dep_live";
+    # ssh root@178.62.237.194 "cd /srv/homefood_live/ && git pull && cd /srv/deploy_homefood_lie/ && mup deploy";
+    exit ;
+}
+
+function deploy_homefood_dev {
+    clear;
+    ssh root@toitla.com "bash -ic dep_dev";
+    # ssh root@178.62.237.194 "cd /srv/homefood_live/ && git pull && cd /srv/deploy_homefood_lie/ && mup deploy";
+    exit ;
+}
+
+function backup_all {
+    backup_meteor;
+    backup_homefood;
+    backup_ghost;
+}
+
+function backup_meteor {
+    server="root@95.85.56.82";
+    echo "";
+    echo "========= BACKUP METEOR =========";
+    ssh root@95.85.56.82 "mongodump -o /srv/dump/$(date +%F)/";
+    mkdir /home/krister/Dropbox/backup/db_meteor_mongo/$(date +%F);
+    scp -r $server:/srv/dump/$(ssh $server 'ls -t /srv/dump | head -1')/* /home/krister/Dropbox/backup/db_meteor_mongo/$(date +%F);
+}
+
+function backup_homefood {
+    server="root@178.62.237.194"
+    echo "";
+    echo "========= BACKUP HOMEFOOD =========";
+    ssh root@178.62.237.194 "mongodump -o /srv/dump/$(date +%F)/";
+    mkdir /home/krister/Dropbox/backup/db_homefood_mongo/$(date +%F);
+    scp -r $server:/srv/dump/$(ssh $server 'ls -t /srv/dump | head -1')/* /home/krister/Dropbox/backup/db_homefood_mongo/$(date +%F);
+}
+
+function backup_ghost {
+    echo "";
+    echo "========= BACKUP GHOST =========";
+    mkdir /home/krister/Dropbox/backup/db_ghost/$(date +%F);
+    scp root@188.226.162.53:/var/www/ghost/content/data/ghost.db /home/krister/Dropbox/backup/db_ghost/$(date +%F);
+}
+
+function restore_homefood {
+    mongorestore -h localhost --port 3001 --db meteor --drop /home/krister/Dropbox/backup/db_homefood_mongo/$(ls -t /home/krister/Dropbox/backup/db_homefood_mongo/ | head -1)/homefood/
+}
+
+function restore_meteor {
+    mongorestore -h localhost --port 3001 --db meteor --drop /home/krister/Dropbox/backup/db_meteor_mongo/$(ls -t /home/krister/Dropbox/backup/db_meteor_mongo/ | head -1)/$1/
+}
+
+function update_ghost {
+    ssh root@188.226.162.53 "service ghost stop && cd /var/www/ && wget http://ghost.org/zip/ghost-latest.zip && rm -rf ghost/core && unzip -uo ghost*.zip -d ghost && chown -R ghost:ghost ghost/* && cd /var/www/ghost && npm install --production && service ghost start";
+}
+
+clear=True
+selection=
+until [ "$selection" = "0" ]; do
+    if [ $clear = True ]; then
+        clear
+    fi
+    echo "      "
+    echo "      "
+    echo "        PILVESERVER COMMANDS  "
+    echo "      ------------------------"
+    echo "      "
+    echo "      b. backup m-g-h"
+    echo "      bm. backup meteor"
+    echo "      bg. backup ghost"
+    echo "      bh. backup homefood"
+    echo "      "
+    echo "      dk. deploy krister"
+    echo "      dm. deploy movienight"
+    echo "      dting. deploy ting"
+    echo "      dko. deploy koodikool"
+    echo "      dp. deploy poll"
+    echo "      dhlive. deploy homefood live"
+    echo "      dh. deploy homefood dev"
+    echo "      dtickets. deploy tickets"
+    echo "      "
+    echo "      fm. ftp meteor"
+    echo "      fg. ssh ghost"
+    echo "      "
+    echo "      rh. restore homefood locally"
+    echo "      rting. restore ting locally"
+    echo "      "
+    echo "      sm. ssh meteor"
+    echo "      sg. ssh ghost"
+    echo "      sh. ssh homefood"
+    echo "      "
+    echo "      ug. update ghost"
+    echo "      "
+    echo "      0."
+    echo "      "
+    echo -n "      "
+    read selection
+    echo ""
+    case $selection in
+        b  ) backup_all ;;
+        bm ) backup_meteor ;;
+        bh ) backup_homefood ;;
+        bg ) backup_ghost ;;
+        rh ) restore_homefood; exit ;;
+        rting ) restore_meteor ting; exit ;;
+        bg ) clear; exit ;;
+        dk ) clear; redeploy krister; exit ;;
+        dm ) clear; redeploy movieatmyplace; exit ;;
+        dting ) clear; redeploy ting; exit ;;
+        dko ) clear; redeploy koodikool; exit ;;
+        dp ) clear; redeploy poll; exit ;;
+        dhlive ) clear; deploy_homefood_live; exit ;;
+        dh ) clear; deploy_homefood_dev; exit ;;
+        dtickets ) clear; redeploy tickets; exit ;;
+        fm ) clear; thunar sftp://95.85.56.82; exit ;;
+        fg ) clear; thunar sftp://188.226.162.53; exit ;;
+        sm ) clear; ssh root@95.85.56.82; exit ;;
+        sg ) clear; ssh root@188.226.162.53; exit ;;
+        sh ) clear; ssh root@178.62.237.194; exit ;;
+        ug ) clear; update_ghost ;;
+        0 ) clear; exit ;;
+        * ) echo "Please enter a number"; clear
+    esac
+done
+
+95.85.56.82

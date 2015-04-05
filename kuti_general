@@ -1,0 +1,80 @@
+#!/bin/bash
+
+# MAIN
+function press_enter {
+    echo ""
+    #echo -n "Press Enter to continue.."
+    #read
+    clear
+}
+
+function systemctl_restart {
+    clear
+    echo "restarting $1..."
+    sudo systemctl restart $1
+    clear
+    echo "restarting $1 done"
+}
+
+function rotate_screen {
+    rotation=`xrandr -q | grep "DP1" | grep -v "eDP1" | cut -b30-35`
+    if [ $rotation = "normal" ] ;
+    then
+      xrandr -o left
+    else
+      xrandr -o normal
+    fi
+}
+
+function recgif {
+    # ffcast -s ffmpeg -vcodec libx264 -b:v 20000k -r 25 recgif_temp.mp4 \
+    ffcast -vvs rec recgif_temp.mp4 \
+        && echo "Converting to gif" \
+        && convert -delay 3 -layers OptimizePlus recgif_temp.mp4 recgif.gif \
+        && echo "Done!"
+}
+
+clear=True
+selection=
+until [ "$selection" = "0" ]; do
+    if [ $clear = True ]; then
+        clear
+    fi
+    echo "      "
+    echo "      "
+    echo "        GENERAL COMMANDS  "
+    echo "      --------------------"
+    echo "      "
+    echo "      1. Rotate DP1"
+    echo "      2. edit /etc/hosts"
+    echo "      3. edit /etc/php/php.ini"
+    echo "      4. systemctl restart httpd"
+    echo "      "
+    echo "      5. edit .bashrc"
+    echo "      6. edit grub"
+    echo "      7. edit oblogout"
+    echo "      8. edit devilspie2"
+    echo "      "
+    echo "      "
+    echo "      recgif - record a gif"
+    echo "      csaudio - fix counter strike audio"
+    echo "      "
+    echo "      0. exit"
+    echo "      "
+    echo -n "      "
+    read selection
+    echo ""
+    case $selection in
+        1 ) rotate_screen; clear; exit ;;
+        2 ) sudo vim /etc/hosts; systemctl_restart httpd; exit ;;
+        3 ) sudo vim /etc/php/php.ini; systemctl_restart httpd; exit ;;
+        4 ) systemctl_restart httpd; exit ;;
+        5 ) sudo vim ~/.bashrc; exit ;;
+        6 ) sudo vim /etc/default/grub; clear; sudo update-grub; exit ;;
+        7 ) sudo vim /etc/oblogout.conf; exit ;;
+        8 ) vim /home/krister/.config/devilspie2/gridOf9.lua; exit ;;
+        recgif ) recgif;;
+        csaudio ) rm -r ~/.config/pulse; pulseaudio -k; exit;;
+        * ) echo "Please enter a number"; press_enter
+    esac
+done
