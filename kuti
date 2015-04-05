@@ -1,23 +1,5 @@
 #!/bin/bash
-# Insert into .bashrc: alias kuti="/home/krister/Dropbox/Linux/cmd/kuti"
-
-function start_general {
-    /home/krister/Dropbox/Linux/cmd/kuti_general
-}
-
-function pilv {
-    /home/krister/Dropbox/Linux/cmd/kuti_pilv
-}
-function screencast {
-    /home/krister/Dropbox/Linux/cmd/kuti_screencast
-}
-
-function press_enter {
-    echo ""
-    #echo -n "Press Enter to continue.."
-    #read
-    clear
-}
+dir=$(dirname $0)
 
 function start_menu {
     clear
@@ -38,25 +20,12 @@ function start_menu {
         read selection
         echo ""
         case $selection in
-            1 ) start_general; exit ;;
-            4 ) pilv; exit ;;
-            5 ) screencast; exit ;;
+            1 ) $dir/kuti_general; exit ;;
+            4 ) $dir/kuti_pilv; exit ;;
+            5 ) $dir/kuti_screencast; exit ;;
             0 ) clear; exit ;;
-            * ) echo "Please enter a valid number"; press_enter
+            * ) clear
         esac
     done
 }
-
-if [ $# = 0 ]; then
-    start_menu
-else
-    while [ "$1" != "" ]; do
-        case $1 in
-            ois ) ois; exit;;
-            moodle ) moodle; exit;;
-            * ) echo "Arguments not found";;
-        esac
-        shift
-    done
-fi
 

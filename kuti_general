@@ -1,13 +1,5 @@
 #!/bin/bash
 
-# MAIN
-function press_enter {
-    echo ""
-    #echo -n "Press Enter to continue.."
-    #read
-    clear
-}
-
 function systemctl_restart {
     clear
     echo "restarting $1..."
@@ -75,6 +67,6 @@ until [ "$selection" = "0" ]; do
         8 ) vim /home/krister/.config/devilspie2/gridOf9.lua; exit ;;
         recgif ) recgif;;
         csaudio ) rm -r ~/.config/pulse; pulseaudio -k; exit;;
-        * ) echo "Please enter a number"; press_enter
+        * ) clear
     esac
 done

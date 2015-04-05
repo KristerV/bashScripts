@@ -1,5 +1,6 @@
 #!/bin/bash
-source ~/newDropbox/cmd/kuti_mixins.sh
+dir=$(dirname $0)
+source $dir/mixins.sh
 
 # MAIN
 function press_enter {
@@ -15,10 +16,10 @@ function rem {
     rm -f rec.gif
 }
 
+## Add -vv for verbosity
 function recRegion {
     ffcast -s rec rec.mkv
 }
-## Add -vv for verbosity
 
 function rec720pulse {
     
